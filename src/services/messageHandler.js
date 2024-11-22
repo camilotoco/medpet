@@ -1,12 +1,74 @@
 import whatsappService from './whatsappService.js';
 
 class MessageHandler {
-  async handleIncomingMessage(message) {
+  async handleIncomingMessage(message, senderInfo) {
     if (message?.type === 'text') {
-      const response = `Echo: ${message.text.body}`;
-      await whatsappService.sendMessage(message.from, response, message.id);
-      await whatsappService.markAsRead(message.id);
+      const incommingMessage = message.text.body.toLowerCase().trim();
+
+      if(this.isGreeting(incommingMessage)){
+        await this.sendWelcomemessage(message.from, message.id, senderInfo);
+        await this.sendWelcomeMenu(message.from)
+
+      }else {
+        const response = `Echo: ${message.text.body}`;
+        await whatsappService.sendMessage(message.from, response, message.id);
+      }
+        await whatsappService.markAsRead(message.id);
+    }else if(message?.type === 'interactive'){
+      const option = message?.interactive?.button_reply?.title.toLowerCase().trim();
+      await this.handleMenuOption(message.from, option);
+      await this.whatsappService.markAsRead(message.id);
+
     }
+  }
+
+  isGreeting(message){
+    const greetings = ["hola", "hello","hi", "buenas tardes"]
+    return greetings.includes(message);
+  }
+
+  getSenderName(senderInfo){
+    return senderInfo.profile?.name || senderInfo.wa_id || "Estudiante";
+  }
+
+  async sendWelcomemessage(to, messageId, senderInfo){
+    const name = this.getSenderName(senderInfo);
+    const welcomeMessage = `Hola ${name}, Bienvenido a nuestra vet online tu tienda de mascotas en linea, En que te puedo ayudar?`;
+    await whatsappService.sendMessage(to, welcomeMessage, messageId)
+  }
+
+  async sendWelcomeMenu(to){
+    const menuMessage ="Elige una Opcion";
+    const buttons = [
+      {
+        type: 'reply', reply: { id: 'option_1', title: 'Agendar Cita'}
+      },
+      {
+        type: 'reply', reply: { id: 'option_2', title: 'Consultar Citas'}
+      },
+      {
+        type: 'reply', reply: { id: 'option_3', title: 'Ubicacion Vet'}
+      }
+    ];
+    await whatsappService.sendInteractiveButtons(to, menuMessage, buttons);
+  }
+
+  async handleMenuOption(to, option){
+    let response;
+    switch(option){
+      case 'Agendar Cita':
+        response = "Agendar Cita";
+        break;
+        case 'Consultar Citas':
+        response = "Consultar Citas";
+        break;
+        case 'Ubicacion Vet':
+        response = "Ubicacion Vet";
+        break;
+       default:
+        response= 'Lo siento no entendi tu seleccion, por favor elige una de las opciones del menu.'
+    }
+    await whatsappService.sendMessage(to, response);
   }
 }
 
