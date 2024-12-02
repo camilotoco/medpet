@@ -7,8 +7,9 @@ class MessageHandler {
 
       if(this.isGreeting(incommingMessage)){
         await this.sendWelcomemessage(message.from, message.id, senderInfo);
-        await this.sendWelcomeMenu(message.from)
-
+        await this.sendWelcomeMenu(message.from);
+      }else if(incommingMessage === 'media'){
+        await this.sendMedia(message.from);
       }else {
         const response = `Echo: ${message.text.body}`;
         await whatsappService.sendMessage(message.from, response, message.id);
@@ -69,6 +70,26 @@ class MessageHandler {
         response= 'Lo siento no entendi tu seleccion, por favor elige una de las opciones del menu.'
     }
     await whatsappService.sendMessage(to, response);
+  }
+
+  async sendMedia(to) {
+    // const mediaUrl = 'https://s3.amazonaws.com/gndx.dev/medpet-audio.aac';
+    // const caption = 'Bienvenida';
+    // const type = 'audio';
+
+    // const mediaUrl = 'https://s3.amazonaws.com/gndx.dev/medpet-imagen.png';
+    // const caption = '¡Esto es una Imagen!';
+    // const type = 'image';
+
+    // const mediaUrl = 'https://s3.amazonaws.com/gndx.dev/medpet-video.mp4';
+    // const caption = '¡Esto es una video!';
+    // const type = 'video';
+
+    const mediaUrl = 'https://s3.amazonaws.com/gndx.dev/medpet-file.pdf';
+    const caption = '¡Esto es un PDF!';
+    const type = 'document';
+
+    await whatsappService.sendMediaMessage(to, type, mediaUrl, caption);
   }
 }
 
