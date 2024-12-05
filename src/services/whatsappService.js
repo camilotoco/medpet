@@ -58,7 +58,7 @@ async sendInteractiveButtons(to, BodyText, buttons){
           type: 'button',
           body: {text: BodyText},
           action: {
-            buttons: buttons,
+            buttons: buttons
           }
         }
       },
